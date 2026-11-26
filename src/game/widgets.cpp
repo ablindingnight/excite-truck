@@ -1186,14 +1186,14 @@ void ArtWidget::Slot28(void) {ImageFillPaintNew* fields=(ImageFillPaintNew*)((Wi
                 borderX = x - (borderWidth / 2.0f);
                 x = borderX;
                 borderHeight = (float) (fields->bottom - fields->top);
-                fn_802354A0(borderImage, borderX, y, zero, 0, borderWidth, borderHeight, -1U);
+                fn_802354A0(borderImage, borderX, y, zero, borderWidth, borderHeight, 0, -1U);
                 frameCount = CountArtSetPictures(borderImage);
                 if (frameCount >= 2) {
                     leftCapWidth = fn_80235EF0(borderImage, 1);
-                    fn_802354A0(borderImage, x - leftCapWidth, y, zero, 1, leftCapWidth, borderHeight, -1U);
+                    fn_802354A0(borderImage, x - leftCapWidth, y, zero, leftCapWidth, borderHeight, 1, -1U);
                 }
                 if (frameCount >= 3) {
-                    fn_802354A0(borderImage, x + borderWidth, y, zero, 2, fn_80235EF0(borderImage, 2), borderHeight, -1U);
+                    fn_802354A0(borderImage, x + borderWidth, y, zero, fn_80235EF0(borderImage, 2), borderHeight, 2, -1U);
                     return;
                 }
             }
@@ -1213,10 +1213,10 @@ void ArtWidget::Slot28(void) {ImageFillPaintNew* fields=(ImageFillPaintNew*)((Wi
                     double phase = fmod(CalculateTimeDelta(), 1.0);
                     extra = (pulseSpan * ((0.5f) + ((0.5f) * (float) sin((double) ((6.2831855f) * (float) phase))))) - (pulseSpan / 2.0f);
 
-                    fn_802354A0(pulseImage, x - (0.5f)*extra, y + (0.5f)*extra, (0.0f), pulseFrame, extra + (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), extra + (float) (fields->bottom - fields->top), -1U);
+                    fn_802354A0(pulseImage, x - (0.5f)*extra, y + (0.5f)*extra, (0.0f), extra + (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), extra + (float) (fields->bottom - fields->top), pulseFrame, -1U);
                     return;
                 }
-                fn_802354A0(pulseImage, x, y, (0.0f), pulseFrame, (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), (float) (fields->bottom - fields->top), -1U);
+                fn_802354A0(pulseImage, x, y, (0.0f), (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), (float) (fields->bottom - fields->top), pulseFrame, -1U);
                 return;
             }
             break;
@@ -1232,10 +1232,10 @@ void ArtWidget::Slot28(void) {ImageFillPaintNew* fields=(ImageFillPaintNew*)((Wi
                 }
                 if ((int) fields->nativeSize != 0) {
                     nativeHeight = GetArtHeight(image, imageFrame);
-                    fn_802354A0(image, x, y, (0.0f), imageFrame, fn_80235EF0(image, imageFrame), nativeHeight, -1U);
+                    fn_802354A0(image, x, y, (0.0f), fn_80235EF0(image, imageFrame), nativeHeight, imageFrame, -1U);
                     return;
                 }
-                fn_802354A0(image, x, y, (0.0f), imageFrame, (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), (float) (fields->bottom - fields->top), -1U);
+                fn_802354A0(image, x, y, (0.0f), (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), (float) (fields->bottom - fields->top), imageFrame, -1U);
                 return;
             }
             break;
@@ -1614,11 +1614,11 @@ void MutableMulti::Slot28(void) {
  if(!fields->provider||!fields->provider->HasNext())nextColor=ObservedArrowColor(&fields->nextTime);
  if((!fields->provider||fields->provider->HasPrevious())||ObservedAbsDecision(previousOffset)>__float_epsilon[0]){
   if(previousArrow){float width=fn_80235EF0(previousArrow,previousFrame);float height=GetArtHeight(previousArrow,previousFrame);
-   fn_802354A0(previousArrow, previousX, y+height/2.0f, (0.0f), previousFrame, width, height, previousColor);}
+   fn_802354A0(previousArrow, previousX, y+height/2.0f, (0.0f), width, height, previousFrame, previousColor);}
  }
  if((!fields->provider||fields->provider->HasNext())||ObservedAbsDecision(nextOffset)>__float_epsilon[0]){
   if(nextArrow){float width=fn_80235EF0(nextArrow,nextFrame);float height=GetArtHeight(nextArrow,nextFrame);
-   fn_802354A0(nextArrow, nextX, y+height/2.0f, (0.0f), nextFrame, width, height, nextColor);}
+   fn_802354A0(nextArrow, nextX, y+height/2.0f, (0.0f), width, height, nextFrame, nextColor);}
  }
 }
 ListBox::ListBox(int x,int y,int width,int height,StringList* list,int* selected,ObservedListViewport* view) : UIWidget(x,y,x+width,y+height,0) {
@@ -1967,10 +1967,10 @@ float previousOffset=ObservedArrowOffset(&f->previousTime),nextOffset=ObservedAr
  
 if(previousArrow){float arrowWidth=fn_80235EF0(previousArrow,previousFrame);
  float arrowHeight=GetArtHeight(previousArrow,previousFrame);
- fn_802354A0(previousArrow, previousOffset, coordinates[0]+(arrowHeight-height)/2.0f, (0.0f), previousFrame, arrowWidth, arrowHeight, previousColor);
+ fn_802354A0(previousArrow, previousOffset, coordinates[0]+(arrowHeight-height)/2.0f, (0.0f), arrowWidth, arrowHeight, previousFrame, previousColor);
  }if(nextArrow){float arrowWidth=fn_80235EF0(nextArrow,nextFrame);
  float arrowHeight=GetArtHeight(nextArrow,nextFrame);
- fn_802354A0(nextArrow, nextX, coordinates[0]+(arrowHeight-height)/2.0f, (0.0f), nextFrame, arrowWidth, arrowHeight, nextColor);
+ fn_802354A0(nextArrow, nextX, coordinates[0]+(arrowHeight-height)/2.0f, (0.0f), arrowWidth, arrowHeight, nextFrame, nextColor);
  }}
 int SimpleSlider::Slot64(int key) {SteppedFloatPrefix* f=(SteppedFloatPrefix*)((WidgetFragment*)this);if(!f->focus||*f->focus!=f->token)return 0;switch(key){case 0x127:if(f->value&&*f->value!=f->maximum){f->nextTime=CalculateTimeDelta();*f->value=InlineWidgetMinimum(*f->value+f->step,f->maximum);}break;case 0x125:if(f->value&&*f->value!=f->minimum){f->previousTime=CalculateTimeDelta();*f->value=InlineWidgetMaximum(*f->value-f->step,f->minimum);}break;case 0x126:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){UpdateWindowMenuSelection(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;case 0x128:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){UpdateMenuSelection(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;default:return 0;}return 1;}
 void SimpleSlider::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound258* f=(Bound258*)((WidgetFragment*)this);f->focus=UpdateMenuEntries(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
@@ -2789,7 +2789,7 @@ ControlButton::ControlButton(WidgetDesc* desc) : UIWidget(desc) {WidgetFragment*
  }
 ControlButton::~ControlButton(void) {WidgetFragment* self=(WidgetFragment*)this;EffectImage351* f=(EffectImage351*)self;if(f->owned)DeleteUIContext(f->matrix);if(f->image)fn_80235380(f->image);f->image=0;}
 void ControlButton::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const UIContext* context=GetTopUIContext();InterpolateTransforms(&scope,f->asset,context);AppendNodeToUIList(&scope);}CalculateScreenPosition(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model, f->x, f->y, (0.0f), f->frame, f->width, f->height, 0xffffffffu);if(f->owned)UpdateTopSlot();}
+    WidgetFragment* self = (WidgetFragment*)this;FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const UIContext* context=GetTopUIContext();InterpolateTransforms(&scope,f->asset,context);AppendNodeToUIList(&scope);}CalculateScreenPosition(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model, f->x, f->y, (0.0f), f->width, f->height, f->frame, 0xffffffffu);if(f->owned)UpdateTopSlot();}
 void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=&f->matrix->xf.basis;Mat3FromEuler(&matrix,&rotation);Mat3Mul(target,&matrix,target);}
 ColorBackground::ColorBackground(WidgetDesc* desc) : UIWidget(desc) {
   WidgetFragment* self=(WidgetFragment*)this;TimedImage349* f=(TimedImage349*)self;
@@ -2883,13 +2883,13 @@ void ColorBackground::Slot28(void) {
 void fn_80227880(float x,float y,float width,float height){DrawColoredQuad(0x40ffffffu,x,y,x+width,y-height,(0.0f));DrawColoredQuad(0x99000000u,x,y,x+width,y-height,(0.0f));}
 void fn_802278F0(gArtSet* image,float x,float y,float width,float height){if(image){
  float offset=(0.0f);int frame=8;
- while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)DrawArtPictureAtPosition(image,frame,x+offset,y,(0.0f));else{float h=GetArtHeight(image,frame);fn_802354A0(image, x+offset, y, (0.0f), frame, width-offset, h, 0xffffffffu);}offset+=tile-(1.0f);frame++;if(frame>=10)frame=8;}
+ while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)DrawArtPictureAtPosition(image,frame,x+offset,y,(0.0f));else{float h=GetArtHeight(image,frame);fn_802354A0(image, x+offset, y, (0.0f), width-offset, h, frame, 0xffffffffu);}offset+=tile-(1.0f);frame++;if(frame>=10)frame=8;}
  offset=(0.0f);frame=10;float h=GetArtHeight(image,10);float bottom=h+(y-height);
- while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)DrawArtPictureAtPosition(image,frame,x+offset,bottom,(0.0f));else fn_802354A0(image, x+offset, bottom, (0.0f), frame, width-offset, h, 0xffffffffu);offset+=tile-(1.0f);frame++;if(frame>=12)frame=10;}
+ while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)DrawArtPictureAtPosition(image,frame,x+offset,bottom,(0.0f));else fn_802354A0(image, x+offset, bottom, (0.0f), width-offset, h, frame, 0xffffffffu);offset+=tile-(1.0f);frame++;if(frame>=12)frame=10;}
  float vertical=(0.0f);frame=4;
- while(vertical<height){float tile=GetArtHeight(image,frame);if(tile-(1.0f)<height-vertical)DrawArtPictureAtPosition(image,frame,x,y-vertical,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image, x, y-vertical, (0.0f), frame, w, height-vertical, 0xffffffffu);}vertical+=tile-(1.0f);frame++;if(frame>=6)frame=4;}
+ while(vertical<height){float tile=GetArtHeight(image,frame);if(tile-(1.0f)<height-vertical)DrawArtPictureAtPosition(image,frame,x,y-vertical,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image, x, y-vertical, (0.0f), w, height-vertical, frame, 0xffffffffu);}vertical+=tile-(1.0f);frame++;if(frame>=6)frame=4;}
  float rightOffset=(0.0f);frame=4;float right=(x+width)-fn_80235EF0(image,4);
- while(rightOffset<height){float tile=GetArtHeight(image,frame);if(tile-(1.0f)<height-rightOffset)DrawArtPictureAtPosition(image,frame,right,y-rightOffset,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image, right, y-rightOffset, (0.0f), frame, w, height-rightOffset, 0xffffffffu);}rightOffset+=tile-(1.0f);frame++;if(frame>=8)frame=6;}
+ while(rightOffset<height){float tile=GetArtHeight(image,frame);if(tile-(1.0f)<height-rightOffset)DrawArtPictureAtPosition(image,frame,right,y-rightOffset,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image, right, y-rightOffset, (0.0f), w, height-rightOffset, frame, 0xffffffffu);}rightOffset+=tile-(1.0f);frame++;if(frame>=8)frame=6;}
  DrawArtPictureAtPosition(image,0,x-(2.0f),(2.0f)+y,(0.0f));
  float w=fn_80235EF0(image,1);DrawArtPictureAtPosition(image,1,((2.0f)+(x+width))-w,(2.0f)+y,(0.0f));
  float cornerY=(y-height-(2.0f))+GetArtHeight(image,2);DrawArtPictureAtPosition(image,2,x-(2.0f),cornerY,(0.0f));
@@ -2952,7 +2952,7 @@ void TopTabDisplay::Slot28(void) {
    rowY = y;
    DrawArtPictureAtPosition(f->frame,0,nextX,rowY,(0.0f));
    nextX+=firstWidth;
-   fn_802354A0(f->frame, nextX, rowY, (0.0f), 1, width, frameHeight, -1U);
+   fn_802354A0(f->frame, nextX, rowY, (0.0f), width, frameHeight, 1, -1U);
    textX = nextX+(width/2.0f);
    textY = rowY-(frameHeight/2.0f);
    unsigned int color=active?-1U:0xFF707070U;
@@ -2975,7 +2975,7 @@ void TopTabDisplay::Slot28(void) {
  fn_80227880(left,y-frameHeight,available,(float)(f->bottom-f->top));
  nextX=left;
  if(multiple){DrawArtPictureAtPosition(f->frame,3,left,panelY,(0.0f));nextX=left+leftWidth;}
- fn_802354A0(f->frame, nextX, panelY, (0.0f), 5, bodyWidth, bodyHeight, -1U);
+ fn_802354A0(f->frame, nextX, panelY, (0.0f), bodyWidth, bodyHeight, 5, -1U);
  titleX = nextX+((0.5f)*bodyWidth);
  const char* title=NameTabsTitleShared(f,selected);
  DrawColoredText(title,f->font,titleX,((5.0f)+panelY)-((0.5f)*bodyHeight),-1U,0x14,(1.2f),(0.0f),(1.0f));

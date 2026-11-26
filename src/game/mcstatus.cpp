@@ -629,12 +629,12 @@ inline void MemBar::Draw(void) {
             fn_80235758(art, 4, sx + lw, sy, fill - lw, ah, lbl_80563830, lbl_80563830, (fill - lw) / mid, 1.0f, -1);
         } else {
             DrawArtPictureAtPosition(art, 3, sx, sy, lbl_80563830);
-            fn_802354A0(art, sx + lw, sy, lbl_80563830, 4, mid, ah, -1);
+            fn_802354A0(art, sx + lw, sy, lbl_80563830, mid, ah, 4, -1);
             fn_80235758(art, 5, mid + (sx + lw), sy, (fill - lw) - mid, ah, lbl_80563830, lbl_80563830, ((fill - lw) - mid) / rw, 1.0f,
                         -1);
         }
         DrawArtPictureAtPosition(art, 0, sx, sy, lbl_80563830);
-        fn_802354A0(art, sx + lw, sy, lbl_80563830, 1, mid, ah, -1);
+        fn_802354A0(art, sx + lw, sy, lbl_80563830, mid, ah, 1, -1);
         DrawArtPictureAtPosition(art, 2, mid + (sx + lw), sy, lbl_80563830);
     } else {
         DrawColoredQuad(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);

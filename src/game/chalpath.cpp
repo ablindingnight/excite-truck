@@ -1079,7 +1079,7 @@ void EventNode::Draw(void) {
         gradeColor = 0xFFFFFFFF;
         tile = 0xFFFFFFFF;
     }
-    fn_802354A0(p->art, x, y, 0.0f, part, (f32)p->w, (f32)p->h, tile);
+    fn_802354A0(p->art, x, y, 0.0f, (f32)p->w, (f32)p->h, part, tile);
     if (p->sel && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
         f32 half = 0.5f;
@@ -1088,7 +1088,7 @@ void EventNode::Draw(void) {
         u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
         f32 nx = x - grow * hw;
         f32 ny = y + grow * hh;
-        fn_802354A0(p->art, nx, ny, 0.0f, part, (1.0f + grow) * (f32)p->w, (1.0f + grow) * (f32)p->h, c);
+        fn_802354A0(p->art, nx, ny, 0.0f, (1.0f + grow) * (f32)p->w, (1.0f + grow) * (f32)p->h, part, c);
     }
     DrawColoredText(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, 0.0f, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
@@ -1203,9 +1203,9 @@ void LevelNode::Draw(void) {
         } else {
             color = 0xFFFFCA44;
         }
-        fn_802354A0(p->art, fx, fy, 0.0f, 0x12, fw, fh, tile);
+        fn_802354A0(p->art, fx, fy, 0.0f, fw, fh, 0x12, tile);
     }
-    fn_802354A0(p->art, x, y, 0.0f, part, (f32)p->w, (f32)p->h, tile);
+    fn_802354A0(p->art, x, y, 0.0f, (f32)p->w, (f32)p->h, part, tile);
     DrawColoredText(((NodeText*)p->lv)->GetText(), p->font, 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
                 1.0f);
 }

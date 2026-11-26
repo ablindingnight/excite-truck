@@ -1120,7 +1120,7 @@ void DrawSpriteWithSize(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
     if (0.0f == w && 0.0f == h) {
         DrawArtPictureAtPosition(art, part, x, y, 1.0f);
     } else {
-        fn_802354A0(art, x, y, 1.0f, part, w, h, -1);
+        fn_802354A0(art, x, y, 1.0f, w, h, part, -1);
     }
 }
 
@@ -1239,30 +1239,30 @@ void DrawLoadingScreenBackground(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet*
     b = GetArtHeight(art, 0);
     p.x = x;
     p.y = y;
-    fn_802354A0(art, p.x, p.y, 0.0f, 0, pw, b, color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, b, 0, color);
 
     pw = fn_80235EF0(art, 1);
     p.y = y;
     p.x = x + w - pw;
-    fn_802354A0(art, p.x, p.y, 0.0f, 1, pw, GetArtHeight(art, 1), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, GetArtHeight(art, 1), 1, color);
 
     pw = fn_80235EF0(art, 2);
     b = GetArtHeight(art, 2);
     p.x = x;
     p.y = b + (y - h);
-    fn_802354A0(art, p.x, p.y, 0.0f, 2, pw, GetArtHeight(art, 2), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, GetArtHeight(art, 2), 2, color);
 
     pw = fn_80235EF0(art, 3);
     p.x = x + w - pw;
     b = GetArtHeight(art, 3);
     p.y = b + (y - h);
-    fn_802354A0(art, p.x, p.y, 0.0f, 3, pw, GetArtHeight(art, 3), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, GetArtHeight(art, 3), 3, color);
 
     a = fn_80235EF0(art, 0);
     p.y = y;
     p.x = x + a;
     pw = w - (a + fn_80235EF0(art, 1));
-    fn_802354A0(art, p.x, p.y, 0.0f, 4, pw, GetArtHeight(art, 0), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, GetArtHeight(art, 0), 4, color);
 
     a = fn_80235EF0(art, 2);
     p.x = x + a;
@@ -1270,26 +1270,26 @@ void DrawLoadingScreenBackground(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet*
     b = GetArtHeight(art, 2);
     p.y = b + (y - h);
     f32 height = b;
-    fn_802354A0(art, p.x, p.y, 0.0f, 5, pw, height, color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, height, 5, color);
 
     pw = fn_80235EF0(art, 0);
     a = GetArtHeight(art, 0);
     p.x = x;
     p.y = y - a;
-    fn_802354A0(art, p.x, p.y, 0.0f, 6, pw, h - (a + GetArtHeight(art, 2)), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, h - (a + GetArtHeight(art, 2)), 6, color);
 
     pw = fn_80235EF0(art, 1);
     p.x = x + w - pw;
     a = GetArtHeight(art, 1);
     p.y = y - a;
-    fn_802354A0(art, p.x, p.y, 0.0f, 7, pw, h - (a + GetArtHeight(art, 3)), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, h - (a + GetArtHeight(art, 3)), 7, color);
 
     a = fn_80235EF0(art, 0);
     p.x = x + a;
     pw = w - a - fn_80235EF0(art, 1);
     b = GetArtHeight(art, 0);
     p.y = y - b;
-    fn_802354A0(art, p.x, p.y, 0.0f, 8, pw, h - b - GetArtHeight(art, 2), color);
+    fn_802354A0(art, p.x, p.y, 0.0f, pw, h - b - GetArtHeight(art, 2), 8, color);
 }
 
 static inline void ApplyRotation(Vec2* v, f32 x, f32 c, f32 s) {

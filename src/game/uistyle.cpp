@@ -645,11 +645,11 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
         f32 imageHeight=GetArtHeight(s->field64_2,current);
-        fn_802354A0(s->field64_2, px, py, 0.0f, current, imageWidth, imageHeight, 0xFFFFFFFF);
+        fn_802354A0(s->field64_2, px, py, 0.0f, imageWidth, imageHeight, current, 0xFFFFFFFF);
         switch(effect) {
         case 1: {
             f32 halfGlow=0.5f*glow;
-            fn_802354A0(s->field64_2, px-halfGlow*imageWidth, py+halfGlow*imageHeight, 0.0f, current, (1.0f+glow)*imageWidth, (1.0f+glow)*imageHeight, ((u32)alpha<<24)|0xFFFFFF);
+            fn_802354A0(s->field64_2, px-halfGlow*imageWidth, py+halfGlow*imageHeight, 0.0f, (1.0f+glow)*imageWidth, (1.0f+glow)*imageHeight, current, ((u32)alpha<<24)|0xFFFFFF);
             break;
         }
         default: break;
@@ -661,14 +661,14 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
                 f32 h=GetArtHeight(s->field64_2,current);
                 w=fn_80235EF0(s->field64_2,(int)s->field3C_6);
                 f32 dx=fn_80235EF0(s->field64_2,current);
-                fn_802354A0(s->field64_2, px+dx, py, 0.0f, suffix, w, h, 0xFFFFFFFF);
+                fn_802354A0(s->field64_2, px+dx, py, 0.0f, w, h, suffix, 0xFFFFFFFF);
             }
         }
         if(s->field64_3&&frame==1) {
             int overlay=(int)s->field3C_7;
             f32 h=GetArtHeight(s->field64_3,overlay);
             f32 w=fn_80235EF0(s->field64_3,(int)s->field3C_7);
-            fn_802354A0(s->field64_3, px+s->field5C, py+s->field60, 0.0f, overlay, w, h, 0xFFFFFFFF);
+            fn_802354A0(s->field64_3, px+s->field5C, py+s->field60, 0.0f, w, h, overlay, 0xFFFFFFFF);
         }
     } else if(alternate) {
         f32 px,py;

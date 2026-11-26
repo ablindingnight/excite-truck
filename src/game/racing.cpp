@@ -713,7 +713,7 @@ void RacingOverlay::DrawScore(void) {
     int score1 = fn_80144F34(lbl_8055D350->view, 1, &b);
     f32 x = fn_80011DEC(lbl_8055D350->player) - 60.0f;
     f32 y = fn_80011DC0(lbl_8055D350->player) - 314.0f;
-    fn_802354A0(uiArt, x, y, 0.0f, 3, 60.0f, 45.0f, -1);
+    fn_802354A0(uiArt, x, y, 0.0f, 60.0f, 45.0f, 3, -1);
     DrawFormattedString(-0x100, 10, "%d", 0.94f, x - 10.0f, y, score0);
     DrawFormattedString(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
 }

@@ -424,7 +424,7 @@ void DrawLoadingBackground(int alpha) {
     f32 width = (1.7777778f * lbl_8055CFF0) / 1.3333334f;
     f32 height = lbl_8055CFF4;
 
-    fn_802354A0(lbl_8055D654, -0.5f * width, 0.5f * height, 0.0f, 0, width, height, (alpha << 24) | 0xFFFFFF);
+    fn_802354A0(lbl_8055D654, -0.5f * width, 0.5f * height, 0.0f, width, height, 0, (alpha << 24) | 0xFFFFFF);
 }
 
 

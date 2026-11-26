@@ -395,7 +395,7 @@ void fn_80145CF4(const GartElem* e, gArtSet* art, int part) {
     f32 w;
     w = fn_801452A0(e->w, e->elemJust);
     y = fn_801452B4(e->pos.y);
-    fn_802354A0(art, fn_801451DC(e->pos.x, e->elemJust), y, 0.0f, part, w, e->h, e->color);
+    fn_802354A0(art, fn_801451DC(e->pos.x, e->elemJust), y, 0.0f, w, e->h, part, e->color);
 }
 
 }  // extern "C"

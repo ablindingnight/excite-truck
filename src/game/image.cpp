@@ -8,7 +8,7 @@ extern "C" {
 
 size_t strlen(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802354A0(gArtSet* img, f32 x, f32 y, f32 z, int frame, f32 width, f32 height, int color);
+void fn_802354A0(gArtSet* img, f32 x, f32 y, f32 z, f32 width, f32 height, int frame, int color);
 void fn_80235758(gArtSet* img, int frame, f32 x, f32 y, f32 width, f32 height,
                  f32 left, f32 top, f32 right, f32 bottom, int color);
 
@@ -81,7 +81,7 @@ void DrawImageFrame(void* img, int frame, f32 x, f32 y, f32 z) {
 
 void DrawImageWithParams(void* img, int frame, f32 x, f32 y, f32 z, f32 width, f32 height) {
     if (img) {
-        fn_802354A0(static_cast<gArtSet*>(img), x, y, z, frame, width, height, -1);
+        fn_802354A0(static_cast<gArtSet*>(img), x, y, z, width, height, frame, -1);
     }
 }
 

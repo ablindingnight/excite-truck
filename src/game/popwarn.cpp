@@ -1283,7 +1283,7 @@ extern "C" {
 
 f32 fn_80235EF0(u8* art, int part);
 void DrawArtPictureAtPosition(u8* art, int part, f32 x, f32 y, f32 z);
-void fn_802354A0(u8* set, f32 x, f32 y, f32 z, int idx, f32 w, f32 h, u32 color);
+void fn_802354A0(u8* set, f32 x, f32 y, f32 z, f32 w, f32 h, int idx, u32 color);
 #ifdef __MWERKS__
 void DrawTextFormatted(CupText* st, f32 x, f32 y, const char* fmt, ...);
 #else
@@ -1301,7 +1301,7 @@ inline void CupSelect::Draw(void) {
         bool cur = i == sel;
         u8* art = cur ? tileSel : tile;
         DrawArtPictureAtPosition(art, 0, 200.0f + off - fn_80235EF0(art, 0), 100.0f, 0.0f);
-        fn_802354A0(tracks, 30.0f + off, 70.0f, 0.0f, i, 140.0f, 140.0f, cur ? 0xFFFFFF00 : 0xC0202020);
+        fn_802354A0(tracks, 30.0f + off, 70.0f, 0.0f, 140.0f, 140.0f, i, cur ? 0xFFFFFF00 : 0xC0202020);
         CupText* tx = text;
         tx->color = cur ? 0xFFFFFF00 : 0xC0202020;
         DrawTextFormatted(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? FijiName() : MexicoName());
