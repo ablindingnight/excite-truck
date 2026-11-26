@@ -1085,7 +1085,7 @@ config.libs.append(
             Object(Matching, "game/alarm.cpp"),
             Object(Matching, "game/trailer.cpp"),
             Object(NonMatching, "game/unk_801BD620.cpp"),
-            Object(NonMatching, "game/masslist.cpp"),
+            Object(Matching, "game/masslist.cpp"),
             Object(Matching, "game/panelvol.cpp"),
             Object(Matching, "game/ppsys.cpp"),
             Object(Matching, "game/interlude.cpp"),
