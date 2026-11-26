@@ -582,6 +582,38 @@ struct RollPanels {
 extern "C" {
 
 // MenuDoRollCall: both players pick a car and colour ("rollcall2.lyt"); returns 1 to go on, 0 to go back.
+// The roll-call item records. Same layout as MenuItem, but the name parameter comes last: the inliner sets formals up
+// right to left, so the name is set up first, matching retail's order here. /* Class name and form unproven */
+struct RollItem {
+    RollItem(int t, const void* d, MenuArg a0, int a1, const char* n) {
+        type = t;
+        name = n;
+        data = d;
+        arg0 = a0;
+        arg1 = a1;
+    }
+    RollItem(const char* t, const NoCaption& none, const char* n) {
+        CaptionContext c(*reinterpret_cast<const int*>(&none));
+        type = 3;
+        name = n;
+        data = t;
+        arg0 = c.value;
+        arg1 = 0;
+    }
+    RollItem(const UnkStatic123s& end) {
+        name = (const char*)end.unk0;
+        type = end.unk4;
+        data = (const void*)end.unk8;
+        arg0 = end.unkC;
+        arg1 = end.unk10;
+    }
+    const char* name;
+    int type;
+    const void* data;
+    MenuArg arg0;
+    int arg1;
+};
+
 int fn_8023FF1C(u8 flag) {
     CarStatsInit();
     LoadCarClassFile();
@@ -592,48 +624,48 @@ int fn_8023FF1C(u8 flag) {
     // PROVISIONAL: text-row base ownership and first-use spelling.
     char (*text2)[0x64];
     s32* sv2;
-    MenuItem items[] = {
-        MenuItem(NULL, 5, &w, 0, 0),
-        MenuItem(NULL, 5, &pp.p1.sel, 0, 0),
-        MenuItem("#carmodel_1", 0x13, &pp.p1.screen, 0, 0),
-        MenuItem("#carmodel_1", pp.p1.picker.chassis, NoCaption()),
-        MenuItem("#model_1", 0x10, NULL, (MenuArg)&pp.p1.picker, 0),
-        MenuItem("#color_1", 5, static_cast<MenuState*>(&pp.p1.color), 0, 0),
-        MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),
-        MenuItem("#controller_1", pp.p1.sel.name, NoCaption()),
-        MenuItem("#car_position_1", 5, pp.p1.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p1", pp.p1.stats.text[0], NoCaption()),
-        MenuItem("#stat_art_1_p1", 2, &pp.p1.stats.stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p1", pp.p1.stats.text[1], NoCaption()),
-        MenuItem("#stat_art_2_p1", 2, &pp.p1.stats.stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p1", pp.p1.stats.text[2], NoCaption()),
-        MenuItem("#stat_art_3_p1", 2, &pp.p1.stats.stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p1", pp.p1.stats.text[3], NoCaption()),
-        MenuItem("#stat_custom_4_p1", 5, &pp.p1.stats.bars[3], 0, 0),
-        MenuItem("#stat_text_5_p1", pp.p1.stats.text[4], NoCaption()),
-        MenuItem("#stat_art_5_p1", 2, &pp.p1.stats.stats.stats[4].value, 0, 0),
-        MenuItem(NULL, 5, &pp.p2.sel, 0, 0),
-        MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
-        MenuItem("#carmodel_2", pp.p2.picker.chassis, NoCaption()),
-        MenuItem("#model_2", 0x10, NULL, (MenuArg)&pp.p2.picker, 0),
-        MenuItem("#color_2", 5, static_cast<MenuState*>(&pp.p2.color), 0, 0),
-        MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
-        MenuItem("#controller_2", pp.p2.sel.name, NoCaption()),
-        MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p2", (text2 = pp.p2.stats.text)[0], NoCaption()),
-        MenuItem("#stat_art_1_p2", 2, &pp.p2.stats.stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p2", text2[1], NoCaption()),
-        MenuItem((const char*)"#stat_art_2_p2", 2, (sv2 = &pp.p2.stats.stats.stats[0].value) + 2 * 1, 0, 0),
-        MenuItem("#stat_text_3_p2", text2[2], NoCaption()),
-        MenuItem((const char*)"#stat_art_3_p2", 2, sv2 + 2 * 2, 0, 0),
-        MenuItem("#stat_text_4_p2", text2[3], NoCaption()),
-        MenuItem("#stat_custom_4_p2", 5, &pp.p2.stats.bars[3], 0, 0),
-        MenuItem("#stat_text_5_p2", text2[4], NoCaption()),
-        MenuItem("#stat_art_5_p2", 2, sv2 + 2 * 4, 0, 0),
-        MenuItem(lbl_80498810),
+    RollItem items[] = {
+        RollItem(5, &w, 0, 0, NULL),
+        RollItem(5, &pp.p1.sel, 0, 0, NULL),
+        RollItem(0x13, &pp.p1.screen, 0, 0, "#carmodel_1"),
+        RollItem(pp.p1.picker.chassis, NoCaption(), "#carmodel_1"),
+        RollItem(0x10, NULL, (MenuArg)&pp.p1.picker, 0, "#model_1"),
+        RollItem(5, static_cast<MenuState*>(&pp.p1.color), 0, 0, "#color_1"),
+        RollItem(2, &pp.p1.picker.item, 0, 0, "#locker_1"),
+        RollItem(pp.p1.sel.name, NoCaption(), "#controller_1"),
+        RollItem(5, pp.p1.screen.state, 0, 0, "#car_position_1"),
+        RollItem(pp.p1.stats.text[0], NoCaption(), "#stat_text_1_p1"),
+        RollItem(2, &pp.p1.stats.stats.stats[0].value, 0, 0, "#stat_art_1_p1"),
+        RollItem(pp.p1.stats.text[1], NoCaption(), "#stat_text_2_p1"),
+        RollItem(2, &pp.p1.stats.stats.stats[1].value, 0, 0, "#stat_art_2_p1"),
+        RollItem(pp.p1.stats.text[2], NoCaption(), "#stat_text_3_p1"),
+        RollItem(2, &pp.p1.stats.stats.stats[2].value, 0, 0, "#stat_art_3_p1"),
+        RollItem(pp.p1.stats.text[3], NoCaption(), "#stat_text_4_p1"),
+        RollItem(5, &pp.p1.stats.bars[3], 0, 0, "#stat_custom_4_p1"),
+        RollItem(pp.p1.stats.text[4], NoCaption(), "#stat_text_5_p1"),
+        RollItem(2, &pp.p1.stats.stats.stats[4].value, 0, 0, "#stat_art_5_p1"),
+        RollItem(5, &pp.p2.sel, 0, 0, NULL),
+        RollItem(0x13, &pp.p2.screen, 0, 0, "#carmodel_2"),
+        RollItem(pp.p2.picker.chassis, NoCaption(), "#carmodel_2"),
+        RollItem(0x10, NULL, (MenuArg)&pp.p2.picker, 0, "#model_2"),
+        RollItem(5, static_cast<MenuState*>(&pp.p2.color), 0, 0, "#color_2"),
+        RollItem(2, &pp.p2.picker.item, 0, 0, "#locker_2"),
+        RollItem(pp.p2.sel.name, NoCaption(), "#controller_2"),
+        RollItem(5, pp.p2.screen.state, 0, 0, "#car_position_2"),
+        RollItem((text2 = pp.p2.stats.text)[0], NoCaption(), "#stat_text_1_p2"),
+        RollItem(2, &pp.p2.stats.stats.stats[0].value, 0, 0, "#stat_art_1_p2"),
+        RollItem(text2[1], NoCaption(), "#stat_text_2_p2"),
+        RollItem(2, (sv2 = &pp.p2.stats.stats.stats[0].value) + 2 * 1, 0, 0, (const char*)"#stat_art_2_p2"),
+        RollItem(text2[2], NoCaption(), "#stat_text_3_p2"),
+        RollItem(2, sv2 + 2 * 2, 0, 0, (const char*)"#stat_art_3_p2"),
+        RollItem(text2[3], NoCaption(), "#stat_text_4_p2"),
+        RollItem(5, &pp.p2.stats.bars[3], 0, 0, "#stat_custom_4_p2"),
+        RollItem(text2[4], NoCaption(), "#stat_text_5_p2"),
+        RollItem(2, sv2 + 2 * 4, 0, 0, "#stat_art_5_p2"),
+        RollItem(lbl_80498810),
     };
     const char* layout = lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt";
-    MenuDesc desc = {layout, items, fn_802411A4, 0, 0};
+    MenuDesc desc = {layout, (MenuItem*)items, fn_802411A4, 0, 0};
     // PROVISIONAL: result lifetime starts before dialog setup.
     int result = 1;
     SetInputChannel(-1);
