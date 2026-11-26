@@ -555,8 +555,7 @@ static inline void InitMapNodes(u8* p) {  // name unproven
     int j;
     int i;
     ((PathScreenBuf*)p)->numEvents = 0;
-    i = lbl_8055F3E4->NumLevels();  // the count first lives in i: its loop range becomes a split lifetime like retail (form unproven)
-    ((PathScreenBuf*)p)->numLevels = i;
+    ((PathScreenBuf*)p)->numLevels = lbl_8055F3E4->NumLevels();
     memset(((PathScreenBuf*)p)->evObjs, 0, sizeof(((PathScreenBuf*)p)->evObjs));
     memset(((PathScreenBuf*)p)->lvObjs, 0, sizeof(((PathScreenBuf*)p)->lvObjs));
     ((PathScreenBuf*)p)->events.count = 0;
