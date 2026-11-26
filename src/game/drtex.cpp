@@ -361,7 +361,8 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
     tex = img->tex;
     int i;
     u8* p = tex;
-    for (i = 0; i < w * h / 2; i++) {
+    int n = w * h / 2;  // bytes (two CI4 texels each)
+    for (i = 0; i < n; i++) {
         *p = *p >> 4 | *p << 4;
         p++;
     }
