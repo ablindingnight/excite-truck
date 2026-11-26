@@ -2741,7 +2741,7 @@ void fn_80186DE8(void) {
         if (!NearZero(((CarBody*)car)->f2650)) {
             throttle = 0.0f;
         }
-        if ((f32)!((f32)__fabs(water[6]) <= __float_epsilon[0]) != 0.0f) {  // a bool converted to float
+        if ((f32)!NearZero(water[6])) {  // a bool converted to float
             brake = 0.0f;
         }
         boosting = 1;
