@@ -741,6 +741,7 @@ static inline void AddBodySphere(u8* p, u8* g, HVec* rel, const RVec3& at, const
 // sized from the model's bounding box (front, middle and rear rows) and a box around the whole body.
 void fn_80182DF4(u8* p, u8* desc) {
     CarBody* cb = (CarBody*)p;
+    HVec c;
     RVec3 rear;
     RVec3 mid;
     RVec3 front;
@@ -774,7 +775,7 @@ void fn_80182DF4(u8* p, u8* desc) {
         fn_801E323C(wheel);
     }
     minY = MaxF(minY, 0.2f);
-    HVec c = *(HVec*)&cb->offset;
+    __memcpy(&c, &cb->offset, sizeof(HVec));  // MWCC memcpy intrinsic (word copy); c stays a frame object above rear
     minX += c.x;
     maxX += c.x;
     minY += c.y;
