@@ -1366,7 +1366,7 @@ static inline void FlushYMorph(DeformQueue* q, int count) {
             if (pc == 0) {
                 break;
             }
-            pout = (f32*)(LC_BUF(buf) + 0x1400);
+            pout = (f32*)LC_BUF(buf) + 0x500;
             f32* out = pout;
             for (int i = 0; i < pc; i++) {
                 SetXYZ((V3*)out, ((f32*)in)[0], ((f32*)in)[1], ((f32*)in)[2]);
@@ -1456,7 +1456,7 @@ void fn_802D6C78(void) {
             if (pc == 0) {
                 break;
             }
-            pout = (f32*)(LC_BUF(buf) + 0x1500);
+            pout = (f32*)LC_BUF(buf) + 0x540;
             V3* o = (V3*)pout;
             for (int i = 0; i < pc; i++) {
                 f32 a = (1.0f / 255) * v->da;
@@ -1534,7 +1534,7 @@ void fn_802D6C78(void) {
             if (pc == 0) {
                 break;
             }
-            pout = (f32*)(LC_BUF(buf) + 0x1000);
+            pout = (f32*)LC_BUF(buf) + 0x400;
             CopyDirXYZ(pout, in, pc);
         }
         LCQueueWait((u32)0);
