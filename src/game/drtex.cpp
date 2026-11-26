@@ -341,17 +341,15 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
 }
 
 /* Helper name unproven: copy linear CI4 bytes into GX tile order. */
+// Helper name unproven: 4-byte (8-texel) CI4 tiles across a row, used in place like TilesAcross (fn_802D86BC).
+static inline int TilesAcross4(int row) { return row / 4; }
+
 static inline void TileCI4(u8* tex, const u8* tmp, int w, int h, int row) {
-    const u8* wa;
-    int tw = w / 2 / 4;
     const u8* src = tmp;
-    int y;
-    for (y = 0; y < h; y++) {
-        wa = src;
-        for (int x = 0; x < w / 2; wa++, x++) {
-            tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = *wa;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w / 2; x++) {
+            tex[((y / 8) * TilesAcross4(row) + x / 4) * 32 + (y % 8) * 4 + x % 4] = src[y * row + x];
         }
-        src += row;
     }
 }
 
