@@ -1384,7 +1384,9 @@ void fn_802D6C78(void) {
     FlushSkin(&lbl_804CAC38);
     SetGQR6();
     SetGQR6();
-    FlushYMorph(&lbl_804D2C40);
+    // Through q: retail reads jobs[0].n via the queue base (a direct &global folds it to an absolute address).
+    q = &lbl_804D2C40;
+    FlushYMorph(q);
     SetGQR6();
     q = &lbl_804D6C44;
     if (q->count) {
