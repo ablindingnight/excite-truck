@@ -461,7 +461,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#unlock_pts", lbl_80498C90, (int)NoCaption()),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", BarArt(bar), NoCaption()),
-                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
+                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, 0),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(0, 5, (u8*)&cars, 0, 0),
                     MenuItem(lbl_8055B860, 6, (const void*)PickRandomGarageCar, 0, 0x72),
