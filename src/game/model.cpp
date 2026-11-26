@@ -580,8 +580,13 @@ void mrModelFixup(ModelInfo* m, const char* name) {
     SwapWordT(&m->lists);
     SwapWordT(&m->maxInst);
     f32* f = &m->radius;
-    for (int k = 0; k < 10; k++) {
+    for (int k = 0; k < 4; k += 2) {
         SwapWordT(&f[k]);
+        SwapWordT(&f[k + 1]);
+    }
+    for (int k = 0; k < 6; k += 2) {
+        SwapWordT(&m->box[k]);
+        SwapWordT(&m->box[k + 1]);
     }
     SwapWordT(&m->pad44);
     Relocate(m->elems, base);
