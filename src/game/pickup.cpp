@@ -641,7 +641,7 @@ static inline V2 Lerp2(const V2& a, const V2& b, f32 t) {
 }
 
 /* Helper name unproven: lerp of two points given as components. */
-static inline V2 LerpC(f32 ax, f32 ay, f32 bx, f32 by, f32 t) {
+static inline V2 LerpC(f32 ax, f32 bx, f32 ay, f32 by, f32 t) {
     V2 r;
     r.y = ay + t * (by - ay);
     r.x = ax + t * (bx - ax);
@@ -851,10 +851,6 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     int nx;
     f32 rest;
     int (*pick)(int, int, int, int);
-    BoundPt* p0;
-    BoundPt* p1;
-    BoundPt* p2;
-    BoundPt* p3;
     int i;
     if (!Match(n->GetName())) {
         fn_802E30C8("CoinBoxPickupMaker: table name \"%s\" is not a match", n->GetName());
@@ -888,18 +884,14 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         pick = fn_801698B8;
     }
     m->BeginGroup(b, -1);
-    p1 = &b->pts[(a + 1) % 4];
-    p0 = &b->pts[i0];
-    p2 = &b->pts[i2];
-    p3 = &b->pts[(a + 3) % 4];
     f32 hr = Mul(0.5f, rest);
     for (i = 0; i <= nx; i++) {
         f32 t = (hr + (f32)i * params[0]) / w;
         f32 l;
         int ny;
         int j;
-        V2 pa = LerpC(p0->x, p0->y, p1->x, p1->y, t);
-        V2 pb = LerpC(p3->x, p3->y, p2->x, p2->y, t);
+        V2 pa = LerpC(b->pts[i0].x, b->pts[(a + 1) % 4].x, b->pts[i0].y, b->pts[(a + 1) % 4].y, t);
+        V2 pb = LerpC(b->pts[(a + 3) % 4].x, b->pts[i2].x, b->pts[(a + 3) % 4].y, b->pts[i2].y, t);
         l = DistC(pb.x, pb.y, pa.x, pa.y);
         ny = 1;
         {
@@ -912,7 +904,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         off = 0.5f * (l - (f32)ny * paramsv);
         for (j = 0; j <= ny; j++) {
             f32 s = (off + (f32)j * params[0]) / l;
-            V2 pt = LerpC(pa.x, pa.y, pb.x, pb.y, s);
+            V2 pt = LerpC(pa.x, pb.x, pa.y, pb.y, s);
             m->Add(pick(j, i, ny, nx), pt, 0.0f);
         }
     }
