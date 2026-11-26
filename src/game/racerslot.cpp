@@ -85,6 +85,8 @@ f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
 }
 extern "C" {
 
+struct MatRef { Mat3* m; };  // name unproven
+
 int fn_8026A698(u8* p, int i) {
     f32* r;
     u8* car = ((CamRec*)p)->car;
@@ -192,10 +194,12 @@ int fn_8026A698(u8* p, int i) {
     if (lbl_8055E3C4 != s->frameNo) {
         ValVec3 at = *(const ValVec3*)&((CamRec*)p)->carFrame.pos;
         TAddSTo(&at, (const ValVec3*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
-        s->target = at;
         ValVec3 v;
         ValVec3 d;
-        d.Set(at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
+        d.x = at.x - s->pos.x;
+        d.y = at.y - s->pos.y;
+        d.z = at.z - s->pos.z;
+        s->target = at;
         f32 xv = s->vel.x;
         f32 blend = 0.2f;
         v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
@@ -213,6 +217,7 @@ int fn_8026A698(u8* p, int i) {
     f.basis[2].x = 0.0f;
     f.basis[2].y = 0.0f;
     f.basis[2].z = 1.0f;
+    MatRef fr = {&f.Mat()};
     f32 orbit[3];
     f32 orbit_1 = s->yaw + s->t * s->spin;
     orbit[0] = 0.0f;
@@ -220,14 +225,14 @@ int fn_8026A698(u8* p, int i) {
     orbit[2] = 0.0f;
     Mat3 m1;
     Mat3FromEuler(&m1, (const Vec3*)orbit);
-    Mat3Mul(&f.Mat(), &m1, &f.Mat());
+    Mat3Mul(fr.m, &m1, fr.m);
     f32 tilt[3];
     tilt[0] = 0.2617994f;
     tilt[1] = 0.0f;
     tilt[2] = 0.0f;
     Mat3 m2;
     Mat3FromEuler(&m2, (const Vec3*)tilt);
-    Mat3Mul(&f.Mat(), &m2, &f.Mat());
+    Mat3Mul(fr.m, &m2, fr.m);
     ValVec3 back;
     back.x = 0.0f;
     back.y = 0.0f;
