@@ -648,6 +648,14 @@ static inline V2 LerpC(f32 ax, f32 ay, f32 bx, f32 by, f32 t) {
     return r;
 }
 
+/* Helper name unproven: distance between two points given as components. */
+static inline f32 DistC(f32 ax, f32 ay, f32 bx, f32 by) {
+    V2 d;
+    d.y = by - ay;
+    d.x = bx - ax;
+    return sqrt(d.x * d.x + d.y * d.y);
+}
+
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
     d.y = b->y - a->y;
@@ -892,7 +900,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         int j;
         V2 pa = LerpC(p0->x, p0->y, p1->x, p1->y, t);
         V2 pb = LerpC(p3->x, p3->y, p2->x, p2->y, t);
-        l = Dist(&pb, &pa);
+        l = DistC(pb.x, pb.y, pa.x, pa.y);
         ny = 1;
         {
             int s = (int)(l / params[0]);
